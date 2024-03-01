@@ -1,0 +1,25 @@
+    nome_gs = input("Write the name of the GSheet = ")
+    try:
+        dataset_gs = gc.open(nome_gs)
+
+        nome_ws = input("Write the name of the Worksheet = ")
+        try:
+            worksheet_gs = dataset_gs.worksheet(nome_ws)
+            rows_ws = worksheet_gs.get_all_values()
+            df_ws = pd.DataFrame.from_records(rows_ws)
+            df_ws.columns = df_ws.iloc[0]
+            df_ws = df_ws.iloc[1:]
+            return df_ws
+        except gspread.WorksheetNotFound:
+            print(f"Worksheet '{nome_ws}' not found.")
+        except Exception as e:
+            print(f"An error occurred while manipulating the worksheet : {e}")
+
+        return dataset_gs
+
+    except gspread.SpreadsheetNotFound:
+        print(f"GSheet '{nome_gs}' not found.")
+    except Exception as e:
+        print(f"An error occurred while opening the GSheet file: {e}")
+
+    return None
