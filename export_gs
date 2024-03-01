@@ -1,0 +1,68 @@
+def export_gs(df):
+
+    name_gs = input('Write the name of the GSheet to which you want to export the DataFrame: ')
+
+    try:
+
+        google_sheet = gc.open(name_gs)
+
+        name_ws = input('Enter the name of the GSheet worksheet to which to export the DataFrame: ')
+
+        try:
+
+            worksheet_gs = google_sheet.worksheet(name_ws)
+            worksheet_gs.clear()
+
+            while True:
+
+                request_clear = input("Do you want to change the appearance of the Worksheet (yes/no, default theme): ").lower()
+
+                if request_clear in ['yes', 'no']:
+                    if request_clear == 'yes':
+
+                        header_size = int(input("Enter header font size number: "))
+                        text_size = int(input('Enter the font size number of the central body: '))
+
+                        header_format = {
+                            "textFormat": {
+                                "fontSize": header_size,
+                                "bold": True
+                            },
+                            "horizontalAlignment": "CENTER",
+                            "verticalAlignment": "MIDDLE"
+                        }
+
+                        text_format = {
+                            "textFormat": {
+                                "fontSize": text_size
+                            },
+                            "horizontalAlignment": "CENTER",
+                            "verticalAlignment": "MIDDLE"
+                        }
+
+                        worksheet_gs.format('A1:Z1', header_format)
+                        worksheet_gs.format('A2:Z', text_format)
+                        worksheet_gs.resize(columns=len(df.columns))
+
+                else:
+                    print("Just enter 'yes' or 'no':")
+                    continue
+
+                break
+
+
+            df_columns = df.columns.values.tolist()
+            df_values = df.values.tolist()
+            worksheet_gs.update([df_columns] + df_values)
+
+            print("The DataFrame has been successfully uploaded to the Google Sheet")
+
+        except gspread.WorksheetNotFound:
+            print(f"Worksheet '<b>{name_ws}</b>' not found.")
+        except Exception as e:
+            print(f"An error occurred while manipulating the worksheet: {e}")
+
+    except gspread.SpreadsheetNotFound:
+        print(f"File GSheet '<b>{name_gs}</b>' not found")
+    except Exception as e:
+        print(f"An error occurred while opening the GSheet file: {e}")
